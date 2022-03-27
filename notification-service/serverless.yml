@@ -1,0 +1,33 @@
+service: notification-service
+
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  region: us-east-2
+  stage: ${opt:stage, 'dev'}
+  environment:
+    MONGODB_URI: mongodb://ecpuseradmin:untold%24123@apis.woozeee.com:2303/notification_service?authSource=admin&readPreference=primary
+    MONGO_DB_NAME: notification-service
+    FIREBASE_PROJECT_ID: woozeee-d7f6c
+    FIREBASE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCsJ2xDwpC6u1c8\n71/X4aFgoxsp8WEQPLbXvSPx0zudAx6uhYL+SuZlaY7IFWNvggGz4V8pdWjeSxCC\nyY2dmpzpn87LThguhckbJ6y/yz46BD30qJvbFNIcPim3at2kGV9XT1tfX9g4eTXY\nqdSW7adTW0dGK3iZJ+YEt1ShUlaFHqS3xAJ+t0HuS7bmT/Ba/6VL13L/61RQx2yx\n1fvHhx9Oww5etwm4w6fO1gIArsYa3GF+Ys+vZy1mMfRC5jJ5G8DVv/qvnJ7yPdOz\ntCkOXfn3HdcfRzphtO9jir294OoNYvcSEV4IwCTbT0G8ZVtVhzjDfw/5huDSNuWe\nktQPmBJpAgMBAAECggEAHX/L33iRkE3Vzw09oSJ6orKQTwmblkqxEhrI9AE8L9V/\nBmy+W5C+FhaWbtaraUofvJEb22DRDXZTZ/XdnGoIBUhrCQ9iuWYXZd3QjjTnfs2H\nSEs0GcBhmJFWWKWpQRtP6QgiIh+sT1EF1xCS6yHiEDiN6Ao+6g+aLKi1iccwKDMl\nmI80iv/7aRgM5zniI9XuSIYp9WifFdteAxETRMsUbIjJ8moIqjuC3iGQJYXC7Mhr\ni2fYM4FNVrwD6EbNJ27kAizWeGy1ETmUY16qQzpbw6wscBdLdIWPjxGyAeOSmNjf\noGxQO/qr634/uZuLXUA1RHzZRECcV8XYoo/VQKQqeQKBgQDsKDRIUX9yPeOK7EkH\nkLDXnfXFjsQRa7bHAbgNRBpShgbQbWbkOtnDBLBS/2PHqDlz4yCIV9AHp/1Githp\nDT/D1cpeKfWJEzL/xCim1hH44YcWh2EOk9upH6D6kkA4OUX23n6qKBc2BnyjEZP+\n1GX9ioUb/W3/wMXVKwrIsEWdGwKBgQC6nn9VpCfvlD5FzF8NrkRcMKEy/b8Sa16F\niRxfuMKH8uFje6+L1xaA3BnHGTseHze7xzlCqTYzAm0nFCJFSjYXU+u/sMGKXFxD\nqRS/3OqBbPHjdx/bBNr1pNvsZSyydRDRHuvSAeA9EFEQj0v7a6poBhfGpBtrNCIL\nMuqqHQtaywKBgQCoFqm3+8Ih12k5PZtxdgxZPEZt+oMV/zwWg+O0FZBCwsDg463D\nrxvGUnUKbltgBh32nWhPg2k/udNtvW/xvgtv4aDryyPIEFFReRaSQXaDVksnvu5X\nSOilhSy4jRaGrkVdRNqVVHnI628VRnK3hAigIVNDK+x6iISHiN5hIA48lwKBgCky\nvGGnr7lQPL8j8wgOJMFFaxDau8fRNDi+oCjxnOBuWhugPozcmvcvn/E4PLjVo3Qs\n8xMoT/LK4lXyN+6cB3z25eCXoOJuqV+2gAIrPwn7hxr0PXAYjk4Uawiw/UEYXvIL\npXvjNiHE7GB/ggKrLh9w2Obda8Aq7ikSwIN1jgApAoGAKLpUDLKK0P4ykvOlOjWD\nhQ+t8S06bDl786qfW8Z8D+e+2l2ZSerDSbEod5ga8/4qK1nQgVGkE+LEhgAVzb8a\nYwOiRZjGrvkBATTPEqGBaRQW4i9bN3MOQDhUQlof6LjL7VQpgRUz5qlXdISEiufd\nAYyCkAMz3HzPsl6fiot4Agw=\n-----END PRIVATE KEY-----\n"
+    FIREBASE_CLIENT_EMAIL: firebase-adminsdk-sfmr0@woozeee-d7f6c.iam.gserviceaccount.com
+    FIREBASE_DATABASE_URL: https://woozeee-d7f6c.firebaseio.com
+  iamRoleStatements:
+    - ${file(iam/SendMailIAM.yml):SendMailIAM}
+
+functions:
+  sendMail:
+    handler: src/handlers/sendMail.handler
+    events:
+      - http:
+          method: POST
+          path: /send_mail
+
+custom:
+  bundle:
+    linting: false
