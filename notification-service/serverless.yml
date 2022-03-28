@@ -27,6 +27,24 @@ functions:
       - http:
           method: POST
           path: /send_mail
+  notifySubscribers:
+    handler: src/handlers/notifySubscribers.handler
+    events:
+      - http:
+          method: POST
+          path: /notify-subscribers
+  subscribeTopic:
+    handler: src/handlers/subscribeTopic.handler
+    events:
+      - http:
+          method: POST
+          path: /subscribe-topic
+  unsubscribeTopic:
+    handler: src/handlers/unsubscribeTopic.handler
+    events:
+      - http:
+          method: POST
+          path: /unsubscribe-topic
 
 custom:
   bundle:

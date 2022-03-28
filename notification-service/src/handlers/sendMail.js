@@ -12,18 +12,18 @@ async function sendMail(event, context) {
   const body = event.body;
   let result;
 
-  try {
-    result = await sendMailWithSES(body);
-    //persist to mongodb
-    // const db = await connectMongodb();
-  } catch (error) {
-    console.log(error);
-    throw new createError.InternalServerError(error);
-  }
+  // try {
+  //   result = await sendMailWithSES(body);
+  //   //persist to mongodb
+  //   // const db = await connectMongodb();
+  // } catch (error) {
+  //   console.log(error);
+  //   throw new createError.InternalServerError(error);
+  // }
 
   return {
     statusCode: 200,
-    body: JSON.stringify(result),
+    body: JSON.stringify(body),
   };
 }
 
