@@ -1,5 +1,9 @@
 SendMailIAM:
   Effect: Allow
   Action:
-    - ses:SendMail
-  Resource: arn:aws:ses:*
+    - ses:SendEmail
+    - ses:SendRawEmail
+    - logs:CreateLogGroup
+    - logs:CreateLogStream
+    - logs:PutLogEvents
+  Resource: "*"

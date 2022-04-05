@@ -1,0 +1,5 @@
+S3IAM:
+  Effect: Allow
+  Action:
+    - s3:GetObject
+  Resource: arn:aws:s3:::notification-service-templates/*

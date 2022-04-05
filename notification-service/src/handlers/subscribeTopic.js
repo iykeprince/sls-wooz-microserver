@@ -1,5 +1,6 @@
 import createError from "http-errors";
 import commonMiddleware from "../libs/commonMiddleware";
+import { firebaseMessaging } from "../libs/firebaseInit";
 
 async function subscribeTopic(event, context) {
   const { token, topic } = event.body;

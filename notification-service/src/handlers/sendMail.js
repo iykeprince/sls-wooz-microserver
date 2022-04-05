@@ -1,30 +1,72 @@
-import { sendMailWithSES } from "../libs/sendMailWithSES";
-import commonMiddleware from "../libs/commonMiddleware";
 import createError from "http-errors";
-import { connectMongodb } from "../libs/connectMongodb";
+import { extractExpectedParams } from "../libs/extractExpectedParams";
+import { parseDataToTemplate } from "../libs/parseDataToTemplate";
+import { readTemplateFromS3 } from "../libs/readTemplateFromS3";
+import { saveLog } from "../libs/saveLog";
+import { sendMailWithSES } from "../libs/sendMailWithSES";
+import { validateMailParams } from "../libs/validateMailParams";
+import Templates from "./../libs/templateDictionary";
 
-/**
- * sendMail handler function should get the body from client,
- * send mail using SES
- * persist the log on mongodb
- */
 async function sendMail(event, context) {
-  const body = event.body;
-  let result;
+  const records = event.Records;
 
-  // try {
-  //   result = await sendMailWithSES(body);
-  //   //persist to mongodb
-  //   // const db = await connectMongodb();
-  // } catch (error) {
-  //   console.log(error);
-  //   throw new createError.InternalServerError(error);
-  // }
+  const recordsAsync = records.map(async (record) => {
+    const email = JSON.parse(record.body);
+    // console.log("Record body of queue", record.body);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(body),
-  };
+    const { emailType, data, from, to, subject } = email;
+    const foundTemplate = Templates[emailType];
+
+    if (!foundTemplate) {
+      throw new createError.NotFound("Email type not recognized");
+    }
+
+    let htmlTemplate = await readTemplateFromS3(foundTemplate.bucketKey);
+    htmlTemplate = htmlTemplate.Body.toString();
+
+    const expectedParams = await extractExpectedParams(["{{", "}}"])(
+      htmlTemplate
+    );
+
+    const validateParams = validateMailParams(
+      Object.keys(data),
+      expectedParams
+    );
+
+    if (!validateParams) {
+      throw new createError.BadRequest(
+        `Expected parameters:"${JSON.stringify(expectedParams)}"`
+      );
+    }
+
+    console.log("validateParam", validateParams);
+    const parsedEmailTemplate = parseDataToTemplate(
+      ["{{", "}}"],
+      data
+    )(htmlTemplate);
+
+    const emailData = {
+      emailType,
+      data,
+      from,
+      to,
+      subject,
+      template: parsedEmailTemplate,
+    };
+    await sendMailWithSES(emailData);
+    // result = await sendMailWithSES(emailData);
+    await saveLog(emailType, to, emailData);
+  });
+
+  try {
+    const result = await Promise.all(recordsAsync);
+    console.log(JSON.stringify(result));
+
+    return "Queue job is done";
+  } catch (error) {
+    console.error(error);
+    throw new createError.InternalServerError(error);
+  }
 }
 
-export const handler = commonMiddleware(sendMail);
+export const handler = sendMail;
