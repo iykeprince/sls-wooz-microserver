@@ -1,6 +1,6 @@
 import AWS from "aws-sdk";
-
-const ses = new AWS.SES({ region: "us-east-1" });
+//{ region: "us-east-2" }
+const ses = new AWS.SES();
 
 export async function sendMailWithSES(body) {
   const { from, to, subject, template } = body;
@@ -22,8 +22,6 @@ export async function sendMailWithSES(body) {
       },
     },
   };
-  console.log("mail params", params);
-  const result = await ses.sendEmail(params).promise();
 
-  return result;
+  return await ses.sendEmail(params).promise();
 }
